@@ -38,3 +38,9 @@ rand = "0.8.5"
 - Statements vs Expressions.
     - Statements are instruction that perform some action and do not return a value. Assignment is a statement and it doesn't return a value, so you can not do x = y = 6 since (y = 6) does not return a value.
     - Expressions evaluate to a resultant value. Expressions DO NOT include ending semicolons.
+
+
+### Chapter 4
+- Stack vs Heap: All data stored on stack must have a known size at compile time, whereas if size is not known in compile time, it may be stored in the heap. Pointer to the heap can be stored on the stack, but when trying to access heap memory you must follow the pointer value.
+- The contents of a string literal are known at compile time and the text is directly hardcoded into the final executable, hence why string literals are fast and efficient.
+- Memory allocated on the heap is "freed" as soon as the variable that "owns" it goes out of scope (RAII in C++ - deallocating resources at the end of an item's lifetime).
