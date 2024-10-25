@@ -4,66 +4,17 @@
 
 // reference - https://www.youtube.com/watch?v=-Jp7sabBCp4&list=PLJbE2Yu2zumDD5vy2BuSHvFZU0a6RDmgb (Rustlang Project: Port Sniffer CLI)
 
+mod arg_parse;
+
 use std::net::TcpStream;
 use std::process;
-use std::str::FromStr;
+use arg_parse::Args;
 use std::sync::mpsc::{channel, Sender};
 use std::thread::{self, JoinHandle};
 use std::{env, net::IpAddr};
 
-// store command line arguments in structured format inside a struct
-#[allow(dead_code)]
-#[derive(Debug)]
-struct Args {
-    flag: String,
-    ipaddr: IpAddr,
-    threads: u32,
-}
-
 const MAX_PORT: u32 = 65536;
 
-impl Args {
-    // annotate str with static so that error can be sent back to main function, might not have needed it if we instead used String (?)
-    fn new(args: &[String]) -> Result<Args, &'static str> {
-        if args.len() < 2 {
-            return Err("Not enough arguments");
-        } else if args.len() > 4 {
-            return Err("Too many arguments");
-        }
-
-        let f = args[1].clone();
-        if let Ok(ipaddr) = IpAddr::from_str(&f) {
-            return Ok(Args {
-                flag: String::from(""),
-                ipaddr,
-                threads: 4,
-            });
-        } else {
-            if (f.contains("-h") || f.contains("-help")) && args.len() == 2 {
-                println!(
-                    "Usage: -j to select number of threads you want
-                \n        -h or -help to show this message"
-                );
-                return Err("help");
-            } else if f.contains("-j") && args.len() == 4 {
-                let threads = match args[2].parse::<u32>() {
-                    Ok(t) => t,
-                    Err(_) => return Err("Error parsing thread count"),
-                };
-                let ipaddr = match IpAddr::from_str(&args[3]) {
-                    Ok(ip) => ip,
-                    Err(_) => return Err("Error parsing IP address"),
-                };
-                return Ok(Args {
-                    flag: String::from("j"),
-                    ipaddr,
-                    threads,
-                });
-            }
-            return Err("Parsing error");
-        };
-    }
-}
 
 fn scan(tx: Sender<u32>, start_port: u32, addr: IpAddr, num_threads: u32) {
     let mut p = start_port;
