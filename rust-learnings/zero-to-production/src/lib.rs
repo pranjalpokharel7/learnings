@@ -1,24 +1,33 @@
 use std::net::TcpListener;
 
-use actix_web::{dev::Server, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use serde::Deserialize;
 
-#[allow(dead_code)]
-async fn greet(req: HttpRequest) -> impl Responder {
-    let name = req.match_info().get("name").unwrap_or("World");
-    format!("Hello {}!", name)
+use actix_web::{dev::Server, web, App, HttpResponse, HttpServer, Responder};
+
+#[derive(Deserialize)]
+struct SubscriptionFormData {
+    pub email: String,
+    pub name: String,
 }
 
 // Responder is a converstion trait into an HttpResponse
-async fn health_check() -> impl Responder {
+async fn health_check() -> HttpResponse {
+    HttpResponse::Ok().finish()
+}
+
+async fn subscibe(_form: web::Form<SubscriptionFormData>) -> impl Responder {
     HttpResponse::Ok().finish()
 }
 
 // std::io::Result<()> is shorthand for Result<(), std::io::Error>.
 pub fn run(listener: TcpListener) -> std::io::Result<Server> {
-    let server =
-        HttpServer::new(|| App::new().route("/health_check/", web::get().to(health_check)))
-            .listen(listener)?
-            .run();
+    let server = HttpServer::new(|| {
+        App::new()
+            .route("/health_check/", web::get().to(health_check))
+            .route("/subscriptions/", web::post().to(subscibe))
+    })
+    .listen(listener)?
+    .run();
 
     Ok(server)
 }
