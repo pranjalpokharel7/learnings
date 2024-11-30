@@ -47,9 +47,15 @@ const drawGrid = () => {
     ctx.stroke();
 }
 
+const isBitSet = (n, arr) => {
+    const byte = Math.floor(n / 8);
+    const mask = 1 << (n % 8);
+    return (arr[byte] & mask) === mask;
+}
+
 const drawCells = () => {
     const cellsPtr = universe.cells();
-    const cells = new Uint8Array(memory.buffer, cellsPtr, UNIVERSE_WIDTH * UNIVERSE_HEIGHT);
+    const cells = new Uint8Array(memory.buffer, cellsPtr, UNIVERSE_WIDTH * UNIVERSE_HEIGHT / 8);
 
     ctx.beginPath();
 
@@ -57,7 +63,7 @@ const drawCells = () => {
         for (let col = 0; col < UNIVERSE_WIDTH; col++) {
             const idx = row * UNIVERSE_WIDTH + col;
 
-            ctx.fillStyle = cells[idx] === Cell.Dead ? DEAD_COLOR : ALIVE_COLOR;
+            ctx.fillStyle = isBitSet(idx, cells) ? ALIVE_COLOR : DEAD_COLOR;
             ctx.fillRect(translateGridPoint(col), translateGridPoint(row), CELL_SIZE, CELL_SIZE);
         }
     }
