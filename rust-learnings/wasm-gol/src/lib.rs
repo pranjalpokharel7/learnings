@@ -47,10 +47,7 @@ impl Universe {
 
 #[wasm_bindgen]
 impl Universe {
-    pub fn new() -> Self {
-        let width = 64;
-        let height = 64;
-
+    pub fn new(width: u32, height: u32) -> Self {
         let indices = 0..(width * height);
         let cells: Vec<Cell> = indices
             .map(|i| {
@@ -96,6 +93,10 @@ impl Universe {
         }
 
         self.cells = next;
+    }
+
+    pub fn cells(&self) -> *const Cell {
+        self.cells.as_ptr()
     }
 }
 
